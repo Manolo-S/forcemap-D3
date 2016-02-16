@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<script type="text/javascript" src="d3.min.js"></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-<style>
+    <script type="text/javascript" src="d3.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+    <style>
     path.link {
         fill: none;
         stroke: #666;
@@ -18,83 +18,104 @@
         font: 10px sans-serif;
         pointer-events: none;
     }
-</style>
 
-<body>
-    <script>
+</style>
+    <body>
+        <script>
         var url = 'http://www.freecodecamp.com/news/hot';
 
-var nodes = [];
-var edges = [];
-var arrLink = [];
-var arrAuthor = [];
-var nodesObj = {};
-var arr;
+        var nodes = [];
+        var edges = [];
+        var arrLink = [];
+        var arrAuthor = [];
+        var nodesObj = {};
+        var arr;
 
-function createLinks(arr){
-    for (var i = 0; i < arr.length; i++){
-        var author = arr[i].author.username;
-        var link = arr[i].link;
-        link = link.slice(link.indexOf('/') + 2, link.indexOf('/',8));
-        edges.push({source: nodesObj[author], target: nodesObj[link]});
-    }
-}
+        function createLinks(arr) {
+            for (var i = 0; i < arr.length; i++) {
+                var author = arr[i].author.username;
+                var link = arr[i].link;
+                link = link.slice(link.indexOf('/') + 2, link.indexOf('/', 8));
+                edges.push({
+                    source: nodesObj[author],
+                    target: nodesObj[link]
+                });
+            }
+        }
 
-function createNodes(arr){
-    for (var i = 0; i < arr.length; i++){
-        var author = arr[i].author.username;
-        var link = arr[i].link;
-        var icon = arr[i].author.picture;
-        link = link.slice(link.indexOf('/') + 2, link.indexOf('/',8));
-        
-        if (arrLink.indexOf(link) === -1){
-          
-          if (nodes.length === 0){
-              nodesObj[link] = 0
-          } else {
-              nodesObj[link] = nodes.length
-          }
-          
-          nodes.push({id: link, weight: 1, type: 'httpLink'});
-          
-          arrLink.push(link);
-        } else {
-            for (var j = 0; j < nodes.length; j++){
-                var node = nodes[j];
-                if (node.id && node.id === link){
-                    node.weight = node.weight + 1;
+        function createNodes(arr) {
+            for (var i = 0; i < arr.length; i++) {
+                var author = arr[i].author.username;
+                var link = arr[i].link;
+                var icon = arr[i].author.picture;
+                link = link.slice(link.indexOf('/') + 2, link.indexOf('/', 8));
+
+                if (arrLink.indexOf(link) === -1) {
+
+                    if (nodes.length === 0) {
+                        nodesObj[link] = 0
+                    } else {
+                        nodesObj[link] = nodes.length
+                    }
+
+                    nodes.push({
+                        id: link,
+                        weight: 1,
+                        type: 'httpLink'
+                    });
+
+                    arrLink.push(link);
+                } else {
+                    for (var j = 0; j < nodes.length; j++) {
+                        var node = nodes[j];
+                        if (node.id && node.id === link) {
+                            node.weight = node.weight + 1;
+                        }
+                    }
+                }
+                if (arrAuthor.indexOf(author) === -1) {
+                    if (nodes.length === 0) {
+                        nodesObj[author] = 0
+                    } else {
+                        nodesObj[author] = nodes.length
+                    }
+
+                    nodes.push({
+                        id: author,
+                        weight: 1,
+                        type: 'author',
+                        icon: icon
+                    });
+
+                    arrAuthor.push(author);
+                } else {
+                    for (var j = 0; j < nodes.length; j++) {
+                        var node = nodes[j];
+                        if (node.id && node.id === author) {
+                            node.weight = node.weight + 1;
+                        }
+                    }
                 }
             }
-          }
-         if (arrAuthor.indexOf(author) === -1){
-          if (nodes.length === 0){
-              nodesObj[author] = 0
-          } else {
-              nodesObj[author] = nodes.length
-          }
-         
-          nodes.push({id: author, weight: 1, type: 'author', icon: icon});
-          
-          arrAuthor.push(author);
-        } else {
-            for (var j = 0; j < nodes.length; j++){
-                var node = nodes[j];
-                if (node.id && node.id === author){
-                    node.weight = node.weight + 1;
-                }
-            }
-          }
-    }
-}
+        }
 
 
         function createForceLayout(nodes, edges) {
 
+            
+            var tooltip = d3.select("body").append("div")
+                .attr("class", "tooltip")
+                .style("opacity", 0)
+                .style('position','absolute')
+                .style('padding','0 10px')
+                .style('background', 'yellow')
+                .style('border-radius', '10px');
+
             var force = d3.layout.force()
-                .charge(-400)
+                .charge(-450)
                 .gravity(.3)
-                .linkDistance(50)
-                .size([1000, 700])
+                .linkDistance(65)
+                .size([1200, 800])
                 .nodes(nodes)
                 .links(edges)
                 .on("tick", forceTick);
@@ -103,7 +124,7 @@ function createNodes(arr){
                 .attr("width", 1500)
                 .attr("height", 1000);
 
-            d3.select("svg").selectAll("line.link").data(force.links()) 
+            d3.select("svg").selectAll("line.link").data(force.links())
                 .enter()
                 .append("line")
                 .attr("class", "link")
@@ -111,30 +132,60 @@ function createNodes(arr){
                 .style("opacity", .5)
                 .style("stroke-width", 2);
 
+
             var nodeEnter = d3.select("svg").selectAll("g.node").data(force.nodes())
                 .enter() //tips
                 .append("g")
                 .attr("class", "node")
                 .call(force.drag())
-               
+
 
             nodeEnter.append("circle")
-                .attr("r", function(d) {if (d.weight === 1){return 4} else {return d.weight * 2.5}})
-                .style("fill", function (d) {if (d.type === 'httpLink'){return 'red'} else {return 'blue'}})
+                .attr("r", function(d) {
+                    if (d.weight === 1) {
+                        return 5
+                    } else {
+                        return d.weight * 3
+                    }
+                })
+                .style("fill", function(d) {
+                    if (d.type === 'httpLink') {
+                        return 'red'
+                    } else {
+                        return 'blue'
+                    }
+                })
                 .style("stroke", "black")
                 .style("stroke-width", "1px")
+               
 
             nodeEnter.append("image")
-               .attr("xlink:href", function(d){return d.icon})
-               .attr('width', 27)
-               .attr('height', 27)
-
-
-            // nodeEnter.append("text")
-            //     .style("text-anchor", "middle")
-            //     .attr("y", 15)
-            //     .text(function(d) {if (d.type === 'httpLink') return d.id})
-
+                .attr("xlink:href", function(d) {
+                    return d.icon
+                })                
+                .attr("id", function(d){return d.id})
+                .attr('width', function(d) {if (d.weight === 1){ return 27} else {return 30 + 0.6*d.weight}})
+                .attr('height', function(d) {if (d.weight === 1){ return 27} else {return 30 + 0.6*d.weight}})
+                .attr("position", "relative")
+                .attr("x", function(d) {if (d.weight === 1){ return -13.5} else {return -15 - 0.3*d.weight}})
+                .attr("y", function(d) {if (d.weight === 1){ return -13.5} else {return -15 - 0.3*d.weight}})
+                .on("mouseover", function(d) {
+                    // var translate = d3.transform(d3.select(this.parentNode).attr("transform")).translate;
+                    // console.log(translate[0], translate[1]);
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", .9);
+                    tooltip.html("
+            <p>" + d.id + "</p>")
+                         .style("left", (d3.event.pageX + 20) + "px")
+                         .style("top", (d3.event.pageY - 12) + "px")
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(100)
+                        .style("opacity", 0);
+                });
+                        
             force.start();
 
 
@@ -155,18 +206,18 @@ function createNodes(arr){
 
                 d3.selectAll("g.node")
                     .attr("transform", function(d) {
-                        return "translate(" + d.x + "," + d.y + ")"})
+                        return "translate(" + d.x + "," + d.y + ")"
+                    })
             }
         }
 
-        $.getJSON( url, function(data){
+        $.getJSON(url, function(data) {
             arr = data;
             createNodes(arr);
             createLinks(arr);
             createForceLayout(nodes, edges);
         });
-
-    </script>
-</body>
-</html>
-                   
+    
+        </script>
+    </body>
+</html> 
